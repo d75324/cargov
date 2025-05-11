@@ -1,0 +1,118 @@
+.env
+*.pyc
+**/*.pyc
+mysite_box/media/*
+.vscode
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+*.cache
+*.log
+*.pot
+*.out
+*.class
+
+# Django
+*.db
+*.sqlite3
+*.sqlite
+*.h5
+.DS_Store
+
+# Environment variables
+.env
+.ev
+
+# media
+mysite_box/media/*
+media/*
+
+# VSCode settings
+.vscode/
+
+# Virtual environments
+venv/
+env/
+ev/
+ENV/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# Environments
+.ev
+.envrc
+*.ev
+
+# Node.js
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Local history
+.history
+
+# IDEs and Editors
+.idea/
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.iml
+
+# Custom exclusion
+*~ # Exclude temp files
