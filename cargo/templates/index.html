@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="col-md-4 offset-md-3"><br><br>
   <form method="POST" action="{% url 'index' %}">
-    {% csrf_token %}    
+    {% csrf_token %}
       <div class="mb-3">
           <input type="text" class="form-control" name="username" placeholder="Usuario" required>
       </div><br>
@@ -16,7 +15,9 @@
           <!-- para deshabilitar el botón Registro, agrego 'disabled':
           <button type="button" class="btn btn-secondary disabled" disabled>Registro</button> 
           -->
-          <button type="button" class="btn btn-secondary">Registro</button>
+          <a href="{% url 'register' %}" class="btn btn-secondary" role="button">Registro</a>
+          <!-- <button type="button" class="btn btn-secondary">Registro</button> -->
+          
         </div>
       </div>   
   </form>
