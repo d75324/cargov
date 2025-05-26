@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from .forms import SignUpForm
+from .forms import DriverRegistrationForm
+
 
 # Create your views here.
 def index(request):
@@ -33,8 +35,6 @@ def report(request):
 @login_required
 def landing(request):
     return render(request, 'truckduties/landing.html')
-
-
 
 def login_user(request):
     pass
@@ -81,3 +81,21 @@ def register_user(request):
     else:
         form = SignUpForm()
     return render(request, 'register.html', {'form': form}) # Pasar el formulario al template en la petición GET 
+
+@login_required # Requiere que el usuario esté logueado
+def add_driver(request):
+    if request.method == 'POST':
+        form = DriverRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save() # El método save del formulario se encarga de crear el User y el TruckDriver
+            messages.success(request, '¡Conductor agregado exitosamente!')
+            # Redirige a la página principal o a una lista de conductores
+            return redirect('index') # O 'drivers_list' si la tienes
+        else:
+            # Si el formulario no es válido, vuelve a renderizar con los errores
+            messages.error(request, 'Por favor, revisa el formulario.')
+            return render(request, 'truckduties/add_driver.html', {'form': form})
+    else:
+        form = DriverRegistrationForm() # Crea un formulario vacío para la petición GET
+    return render(request, 'truckduties/add_driver.html', {'form': form})
+

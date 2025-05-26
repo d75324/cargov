@@ -10,7 +10,7 @@ class TruckDriver(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='truck_driver')
     first_name = models.CharField(max_length=30, verbose_name='Nombre')
     last_name = models.CharField(max_length=30, verbose_name='Apellido')
-    email = models.EmailField(max_length=254, unique=True, verbose_name='Correo Electrónico')
+    email = models.EmailField(max_length=254, verbose_name='Correo Electrónico')
     address = models.CharField(max_length=255, blank=True, null=True, verbose_name='Dirección')
     license_number = models.CharField(max_length=20, unique=True, verbose_name='Cédula de Identidad')
     cell_number = models.CharField(max_length=15, blank=True, null=True, verbose_name='Número de Celular')

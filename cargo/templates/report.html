@@ -3,7 +3,17 @@
 
 <nav class="navbar navbar-expand-lg" style="background-color: #d8e7ec;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">CargaV</a>
+      
+      <a class="navbar-brand" href="#">
+        {% if user.is_authenticated %}
+        <strong>{{ user.first_name|default:user.username|capfirst }}</strong> 
+        {% else %}
+            CargaV
+        {% endif %}
+    </a>
+      
+
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -23,7 +33,7 @@
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
   <h3>Conductores</h3>
   <div>
-    <button class="btn btn-sm btn-outline-secondary">Agregar Conductor</button>
+    <a href="{% url 'add_driver' %}" class="btn btn-sm btn-outline-secondary">Agregar Conductor</a>
     <button class="btn btn-sm btn-outline-secondary">Desafectar Conductor</button>
   </div>
 </div>
