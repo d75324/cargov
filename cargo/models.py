@@ -7,13 +7,13 @@ from django.utils import timezone
 # 3 modelos: TruckDriver (conductores), Trucks (vehículos) y TruckTrips (viajes).
 
 class TruckDriver(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='truck_driver')
-    first_name = models.CharField(max_length=30, verbose_name='Nombre')
-    last_name = models.CharField(max_length=30, verbose_name='Apellido')
-    email = models.EmailField(max_length=254, verbose_name='Correo Electrónico')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='truck_driver', verbose_name='Condcutor')
+    #first_name = models.CharField(max_length=30, verbose_name='Nombre')
+    #last_name = models.CharField(max_length=30, verbose_name='Apellido')
+    #email = models.EmailField(max_length=254, verbose_name='Correo Electrónico')
     address = models.CharField(max_length=255, blank=True, null=True, verbose_name='Dirección')
     license_number = models.CharField(max_length=20, unique=True, verbose_name='Cédula de Identidad')
-    cell_number = models.CharField(max_length=15, blank=True, null=True, verbose_name='Número de Celular')
+    cell_number = models.CharField(max_length=15, blank=True, null=True, verbose_name='Número de Celular (formato: 09XXXXXXX)')
 
     class Meta:
         verbose_name = 'Conductor de Camión'
@@ -25,6 +25,10 @@ class TruckDriver(models.Model):
     @property
     def full_name(self):
         return f"{self.user.first_name} {self.user.last_name}"
+    
+    @property
+    def email(self):
+        return self.user.email  # Acceso directo al email del User
 
 class Truck(models.Model):
     plate_number = models.CharField(max_length=15, unique=True, verbose_name='Número de Matrícula')

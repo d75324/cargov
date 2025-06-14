@@ -82,9 +82,19 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'register.html', {'form': form}) # Pasar el formulario al template en la petición GET 
 
-@login_required # Requiere que el usuario esté logueado
 def add_driver(request):
     if request.method == 'POST':
+
+        # --- MUY IMPORTANTE: Imprime los datos POST ---
+        print("--- Datos POST recibidos ---")
+        for key, value in request.POST.items():
+            if "password" in key: # Para no imprimir contraseñas en texto plano en la consola
+                print(f"{key}: {'*****'}")
+            else:
+                print(f"{key}: {value}")
+        print("----------------------------")
+        # --- Fin de la impresión POST ---
+
         form = DriverRegistrationForm(request.POST)
         if form.is_valid():
             form.save() # El método save del formulario se encarga de crear el User y el TruckDriver
@@ -92,10 +102,10 @@ def add_driver(request):
             # Redirige a la página principal o a una lista de conductores
             return redirect('index') # O 'drivers_list' si la tienes
         else:
+            print("Errores del formulario:", form.errors)
             # Si el formulario no es válido, vuelve a renderizar con los errores
             messages.error(request, 'Por favor, revisa el formulario.')
             return render(request, 'truckduties/add_driver.html', {'form': form})
     else:
         form = DriverRegistrationForm() # Crea un formulario vacío para la petición GET
     return render(request, 'truckduties/add_driver.html', {'form': form})
-
