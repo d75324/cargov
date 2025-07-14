@@ -25,132 +25,140 @@
         </ul>
       </div>
     </div>
-  </nav>
-<br>
-<h4>Reporte</h4>
-<i>working on</i>
-<hr>
+  </nav><br><br>
+
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
-  <h3>Conductores</h3>
+  <h3>Conductores ({{ total_trucks }})</h3>
   <div>
     <a href="{% url 'add_driver' %}" class="btn btn-sm btn-outline-secondary">Agregar Conductor</a>
     <button class="btn btn-sm btn-outline-secondary">Desafectar Conductor</button>
   </div>
-</div>
+</div><hr>
 
 <!-- tabla conductores -->
-
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Usuario</th>
-      <th scope="col">Nombre</th>
-      <th scope="col">Apellido</th>
-      <th scope="col">No. Documento</th>
-      <th scope="col">Dirección</th>
-      <th scope="col">Otros</th>
-      <th scope="col"></th>
-      <th scope="col"></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>Otto</td>      
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-      <td></td>
-      <td></td>
-    </tr>
-  </tbody>
-</table>
-
+<div class="container mt-4">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Usuario</th>
+                <th scope="col">Nombre Apellido</th>
+                <th scope="col">Email</th>
+                <th scope="col">No. Documento</th>
+                <th scope="col">Dirección</th>
+                <th scope="col">Fecha de Alta</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for driver in drivers %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ driver.user.username }}</td>
+                <td>{{ driver.user.first_name }} {{ driver.user.last_name }}</td>
+                <td>{{ driver.user.email }}</td>
+                <td>{{ driver.license_number }}</td>
+                <td>{{ driver.address }}</td>
+                <td>{{ driver.user.date_joined|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="btn btn-sm btn-danger">Des</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No hay conductores registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div><br><br>
 <!-- fin tabla conductores-->
 
-<hr>
+
+<!-- encabezado cuadro vehículos -->
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
-  <h3>Vehículos</h3>
+  <h3>Vehículos ({{ total_trucks }})</h3>
   <div>
     <button class="btn btn-sm btn-outline-secondary">Buscar</button>
-    <button class="btn btn-sm btn-outline-secondary">Descargar Reporte</button>
+    <a href="{% url 'add_truck' %}" class="btn btn-sm btn-outline-secondary">Agregar Vehículo</a>
   </div>
-</div>
+</div><hr>
+<!-- fin de encabezado cuadro vehículos -->
+
 
 <!-- tabla vehiculos -->
+<div class="container mt-4">
+    <!-- Filtros -->
+    <div class="mb-3">
+        <a href="?is_available=true" class="btn btn-sm btn-outline-success me-2">Disponibles</a>
+        <a href="?is_available=false" class="btn btn-sm btn-outline-secondary me-2">No Disponibles</a>
+        <a href="?" class="btn btn-sm btn-outline-dark">Todos</a>
+    </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Marca</th>
-      <th scope="col">Patente</th>
-      <th scope="col">Año</th>
-      <th scope="col">Kilometraje</th>
-      <th scope="col">Combustible</th>            
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-      <td>@mdo</td>
-      <td>@mdo</td>            
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td>@mdo</td>
-      <td>@mdo</td>            
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-    </tr>
-  </tbody>
-</table>
-
+    <!-- Tabla unificada -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Matrícula</th>
+                <th scope="col">Marca/Modelo</th>
+                <th scope="col">Año</th>
+                <th scope="col">Conductor</th>
+                <th scope="col" class="text-end">Estado</th>
+                <th scope="col" class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for truck in trucks %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ truck.plate_number }}</td>
+                <td>{{ truck.brand }} {{ truck.moddel }}</td>
+                <td>{{ truck.year }}</td>
+                <td>
+                    {% if truck.driver %}
+                        {{ truck.driver.user.get_full_name }}
+                    {% else %}
+                        <span class="text-muted">Sin asignar</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    {% if truck.is_available %}
+                        <span class="badge bg-success">Disponible</span>
+                    {% else %}
+                        <span class="badge bg-secondary">No Disponible</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="#" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="btn btn-sm btn-danger">Des</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    No hay vehículos registrados. 
+                    <a href="{% url 'add_truck' %}">Agregar uno</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 <!-- fin tabla vehículos -->
 
-<hr>
+<br>
+<br>
+
+<!-- encabezado cuadro viajes -->
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
   <h3>Viajes</h3>
   <div>
     <button class="btn btn-sm btn-outline-secondary">Buscar</button>
     <button class="btn btn-sm btn-outline-secondary">Descargar Reporte</button>
   </div>
-</div>
+</div><hr>
 
 <!-- tabla viajes -->
 

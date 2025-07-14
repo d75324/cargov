@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow p-4">
+                <h3 class="mb-4 text-center">Registrar Carga de Combustible</h3>
+
+                <p class="text-center">
+                    <strong>Camión:</strong> {{ trip.truck.brand }} {{ trip.truck.moddel }}<br>
+                    <strong>Matrícula:</strong> {{ trip.truck.plate_number }}<br>
+                    <strong>Fecha del viaje:</strong> {{ trip.date }}
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Kilometraje -->
+                    <div class="mb-3">
+                        {{ form.mileage.label_tag }}
+                        {{ form.mileage }}
+                        {% if form.mileage.errors %}
+                            <div class="text-danger">{{ form.mileage.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Litros cargados -->
+                    <div class="mb-3">
+                        {{ form.fuel_loaded_liters.label_tag }}
+                        {{ form.fuel_loaded_liters }}
+                        {% if form.fuel_loaded_liters.errors %}
+                            <div class="text-danger">{{ form.fuel_loaded_liters.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Importe cargado -->
+                    <div class="mb-3">
+                        {{ form.fuel_loaded_amount.label_tag }}
+                        {{ form.fuel_loaded_amount }}
+                        {% if form.fuel_loaded_amount.errors %}
+                            <div class="text-danger">{{ form.fuel_loaded_amount.errors }}</div>
+                        {% endif %}
+                    </div>
+
+<div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'travel_actions' trip.id %}" class="btn btn-outline-secondary">
+        ← Volver al viaje
+    </a>
+    <button type="submit" class="btn btn-primary">
+        Guardar Combustible
+    </button>
+</div>
+                </form>
+                <!-- sacamos esta parte: 
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'travel_actions' trip.id %}" class="btn btn-link">← Volver al viaje</a>
+                </div> -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

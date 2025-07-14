@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow p-4">
+                <h3 class="mb-4 text-center">Registrar Descarga</h3>
+
+                <p class="text-center">
+                    <strong>Camión:</strong> {{ trip.truck.brand }} {{ trip.truck.moddel }}<br>
+                    <strong>Matrícula:</strong> {{ trip.truck.plate_number }}<br>
+                    <strong>Fecha del viaje:</strong> {{ trip.date }}
+                </p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Lugar de descarga -->
+                    <div class="mb-3">
+                        {{ form.unload_location.label_tag }}
+                        {{ form.unload_location }}
+                        {% if form.unload_location.errors %}
+                            <div class="text-danger">{{ form.unload_location.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Kilometraje final -->
+                    <div class="mb-3">
+                        {{ form.mileage.label_tag }}
+                        {{ form.mileage }}
+                        {% if form.mileage.errors %}
+                            <div class="text-danger">{{ form.mileage.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'travel_actions' trip.id %}" class="btn btn-outline-secondary">
+                            ← Volver al viaje
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            Registrar Descarga
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

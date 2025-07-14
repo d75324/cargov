@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="col-md-4 offset-md-3"><br><br>
+    <h2>Registrar un nuevo viaje</h2><br><br>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Camión -->
+        <div class="mb-3">
+            {{ form.truck.label_tag }} 
+            {{ form.truck }}
+            {% if form.truck.errors %}
+                <div class="text-danger">{{ form.truck.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Kilometraje -->
+        <div class="mb-3">
+            {{ form.mileage.label_tag }}
+            {{ form.mileage }}
+            {% if form.mileage.errors %}
+                <div class="text-danger">{{ form.mileage.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Tipo de carga -->
+        <div class="mb-3">
+            {{ form.load_type.label_tag }}
+            {{ form.load_type }}
+            {% if form.load_type.errors %}
+                <div class="text-danger">{{ form.load_type.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Lugar de carga -->
+        <div class="mb-3">
+            {{ form.load_location.label_tag }}
+            {{ form.load_location }}
+            {% if form.load_location.errors %}
+                <div class="text-danger">{{ form.load_location.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirmar Viaje</button>
+    </form>
+</div>
+
+
+<!-- JavaScript para actualizar el kilometraje al seleccionar camión -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const truckSelect = document.getElementById("id_truck");
+        const mileageInput = document.getElementById("id_mileage");
+
+        truckSelect.addEventListener('change', function () {
+            const truckId = this.value;
+
+            if (truckId) {
+                fetch(`/ajax/get-truck-mileage/?truck_id=${truckId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.mileage !== undefined) {
+                            mileageInput.value = data.mileage;
+                        }
+                    });
+            }
+        });
+    });
+</script>
+
+
+{% endblock %}

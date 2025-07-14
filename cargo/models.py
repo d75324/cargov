@@ -8,12 +8,11 @@ from django.utils import timezone
 
 class TruckDriver(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='truck_driver', verbose_name='Condcutor')
-    #first_name = models.CharField(max_length=30, verbose_name='Nombre')
-    #last_name = models.CharField(max_length=30, verbose_name='Apellido')
-    #email = models.EmailField(max_length=254, verbose_name='Correo Electrónico')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_drivers')
     address = models.CharField(max_length=255, blank=True, null=True, verbose_name='Dirección')
     license_number = models.CharField(max_length=20, unique=True, verbose_name='Cédula de Identidad')
     cell_number = models.CharField(max_length=15, blank=True, null=True, verbose_name='Número de Celular (formato: 09XXXXXXX)')
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'Conductor de Camión'
@@ -30,10 +29,18 @@ class TruckDriver(models.Model):
     def email(self):
         return self.user.email  # Acceso directo al email del User
 
+
 class Truck(models.Model):
     plate_number = models.CharField(max_length=15, unique=True, verbose_name='Número de Matrícula')
-    driver = models.ForeignKey(TruckDriver, on_delete=models.CASCADE, related_name='trucks', blank=True, verbose_name='Conductor')
-    model = models.CharField(max_length=50, verbose_name='Modelo')
+    driver = models.ForeignKey(
+        TruckDriver, 
+        on_delete=models.SET_NULL, 
+        related_name='trucks', 
+        null=True,
+        blank=True, 
+        verbose_name='Conductor'
+        )
+    moddel = models.CharField(max_length=50, verbose_name='Modelo')
     brand = models.CharField(max_length=50, verbose_name='Marca')
     year = models.PositiveIntegerField(verbose_name='Año de Fabricación')
     capacity = models.CharField(max_length=50, blank=True, null=True, verbose_name='Capacidad de Carga')
@@ -43,6 +50,15 @@ class Truck(models.Model):
     total_fuel_consumption = models.FloatField(default=0.0, verbose_name='Consumo Total de Combustible (Litros)') 
     # is_available indica si el camión está disponible para ser asignado a un viaje. La idea es que si dejo de usar un camión, por el motivo que sea, los viajes asociados a ese camión no se eliminen.
     is_available = models.BooleanField(default=True, verbose_name='Disponible')
+    # Este campo es para saber que usuario (manager) agregó el camión al sistema.
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Agregado por",
+        related_name='truck_added_by'
+    )
+    mileage = models.PositiveIntegerField(default=0, verbose_name='Kilometraje Actual')
 
     class Meta:
         verbose_name = 'Camión'
@@ -50,7 +66,8 @@ class Truck(models.Model):
         ordering = ['plate_number']  # Ordeno la lista de camiones por el número de matrícula.
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.plate_number})"
+        return f"{self.brand} {self.moddel} ({self.plate_number})"
+
 
 class TruckTrip(models.Model):
     date = models.DateField(default=timezone.now, verbose_name='Fecha del Viaje')
@@ -80,8 +97,8 @@ class TruckTrip(models.Model):
     ]
     unload_location = models.CharField(max_length=2, choices=UNLOAD_LOCATIONS, verbose_name='Lugar de Descarga')
     mileage = models.PositiveIntegerField(verbose_name='Kilometraje al Cargar Combustible')
-    fuel_loaded_liters = models.FloatField(verbose_name='Carga Combustible (Litros)')
-    fuel_loaded_amount = models.FloatField(verbose_name='Carga Combustible (Importe)')
+    fuel_loaded_liters = models.FloatField(null=True, blank=True, verbose_name='Carga Combustible (Litros)')
+    fuel_loaded_amount = models.FloatField(null=True, blank=True, verbose_name='Carga Combustible (Importe)')
 
     class Meta:
         verbose_name = 'Viaje de Camión'
