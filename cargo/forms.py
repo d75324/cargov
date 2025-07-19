@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 
-# Formulario de registro de usuario
+# Formulario GENERAL de registro de usuario, en el principio.
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=False, label="", widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Correo Electróncio'}))
     
@@ -49,7 +49,7 @@ class DriverRegistrationForm(forms.ModelForm):
     license_number = forms.CharField(
         max_length=20, 
         label="No. Documento (Cédula de Identidad)",
-        widget=forms.TextInput(attrs={'placeholder': 'Ej: 1.234.567-8'})
+        widget=forms.TextInput(attrs={'placeholder': 'Ej: 12345678'})
     )
     cell_number = forms.CharField(
         max_length=15, 
@@ -121,13 +121,13 @@ class TruckForm(forms.ModelForm):
 
     class Meta:
         model = Truck
-        fields = ['plate_number', 'driver', 'brand', 'moddel', 'year', 'capacity'] 
+        fields = ['plate_number', 'driver', 'brand', 'moddel', 'year', 'mileage'] 
         widgets = {
             'plate_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: ABC-1234'}),
             'moddel': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Modelo XYZ'}),
             'brand': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Volvo'}),
             'year': forms.NumberInput(attrs={'class': 'form-control', 'min': '1900', 'max': '2030'}),
-            'capacity': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 20 toneladas'}),
+            'mileage': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Kilometraje'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -163,12 +163,30 @@ class TruckForm(forms.ModelForm):
 
 # formulario usado por el conductor o driver para registrar el inicio de un viaje.
 class TruckDutyForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            # Buscar el TruckDriver asociado al user
+            try:
+                driver = TruckDriver.objects.get(user=user)
+                manager = driver.created_by  # El manager que lo creó
+
+                # Mostrar solo los camiones creados por ese manager
+                self.fields['truck'].queryset = Truck.objects.filter(
+                    is_available=True,
+                    created_by=manager
+                )
+            except TruckDriver.DoesNotExist:
+                self.fields['truck'].queryset = Truck.objects.none()  # Nada si no es driver
+
     class Meta:
         model = TruckTrip
         fields = ['truck', 'mileage', 'load_type', 'load_location']
 
     truck = forms.ModelChoiceField(
-        queryset=Truck.objects.filter(is_available=True),
+        queryset=Truck.objects.none(),
         label='Vehículo',
         widget=forms.Select(attrs={'class': 'form-control'})
     )

@@ -58,7 +58,7 @@ class Truck(models.Model):
         verbose_name="Agregado por",
         related_name='truck_added_by'
     )
-    mileage = models.PositiveIntegerField(default=0, verbose_name='Kilometraje Actual')
+    mileage = models.PositiveIntegerField(verbose_name='Kilometraje')
 
     class Meta:
         verbose_name = 'Camión'
@@ -73,6 +73,16 @@ class TruckTrip(models.Model):
     date = models.DateField(default=timezone.now, verbose_name='Fecha del Viaje')
     end_load_time = models.TimeField(default=timezone.now, verbose_name='Hora de Finalización de Carga')
     truck = models.ForeignKey(Truck, on_delete=models.CASCADE, related_name='trips', verbose_name='Camión')
+
+    driver = models.ForeignKey(
+    TruckDriver,
+    on_delete=models.SET_NULL, # si algún día se un conductor, los viajes no se borran.
+    null=True,
+    blank=False,
+    related_name='trips',
+    verbose_name='Conductor'
+)
+
     # Lista de los tipos de carga
     LOAD_TYPES = [
         ('A', 'Carga A'),
@@ -96,6 +106,8 @@ class TruckTrip(models.Model):
         ('D3', 'Descarga 3'),
     ]
     unload_location = models.CharField(max_length=2, choices=UNLOAD_LOCATIONS, verbose_name='Lugar de Descarga')
+    unload_time = models.DateTimeField(default=timezone.now, verbose_name='Hora de Descarga')
+    initial_mileage = models.PositiveIntegerField(default=0, verbose_name='Kilometraje al Iniciar Viaje')
     mileage = models.PositiveIntegerField(verbose_name='Kilometraje al Cargar Combustible')
     fuel_loaded_liters = models.FloatField(null=True, blank=True, verbose_name='Carga Combustible (Litros)')
     fuel_loaded_amount = models.FloatField(null=True, blank=True, verbose_name='Carga Combustible (Importe)')

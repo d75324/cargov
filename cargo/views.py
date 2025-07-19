@@ -8,7 +8,8 @@ from django.core.paginator import Paginator
 from .models import TruckDriver, Truck, TruckTrip
 from django.http import JsonResponse
 #from .models import TruckDuty
-
+import csv
+from django.http import HttpResponse
 
 
 def index(request):
@@ -42,13 +43,26 @@ def report(request):
     trucks = Truck.objects.filter(
         created_by=request.user
     ).select_related('driver__user')  # Optimiza la consulta del conductor
-    
+
+    # Obtener todos los viajes que pertenecen a los camiones del manager
+    trips = TruckTrip.objects.filter(
+        truck__created_by=request.user,
+        mileage__isnull=False  # Solo viajes completados
+    ).select_related('truck', 'truck__driver', 'truck__driver__user')\
+     .order_by('-date')
+
+    # Calcular distancia recorrida y agregarla dinámicamente
+    for trip in trips:
+        trip.distance = (trip.mileage or 0) - (trip.initial_mileage or 0)
+
     context = {
         'drivers': drivers,
         'trucks': trucks,
+        'trips': trips,
         'total_trucks': trucks.count()
     }
     return render(request, 'report.html', context)
+
 
 
 @login_required
@@ -74,37 +88,34 @@ def register_user(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
-            # authenticate y login
+            user = form.save()  # Guarda el usuario y lo retorna
+            # Autenticar y loguear al usuario
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
-            user = authenticate(request, username=username, password=password) # Necesitas pasar 'request' como primer argumento
+            user = authenticate(request, username=username, password=password)
+            
             if user is not None:
                 login(request, user)
-                # Asignar el grupo según el tipo de usuario
-                user_type = form.cleaned_data['user_type']
+                # lo asignamos automáticamente al grupo "Managers"
                 try:
-                    if user_type == 'Conductores':
-                        group = Group.objects.get(name='Drivers')
-                    elif user_type == 'Administrador':
-                        group = Group.objects.get(name='Managers')
-                    if group:
-                        user.groups.add(group)
+                    group = Group.objects.get(name='Managers')  # para estar seguros que existe
+                    user.groups.add(group)
                 except Group.DoesNotExist:
-                    messages.error(request, f'El grupo "{user_type}" no existe.')
-                    return render(request, 'register.html', {'form': form}) # Re-renderizar con el formulario y el error
-                messages.success(request, 'Usuario creado exitosamente!')
+                    messages.error(request, 'El grupo "Managers" no existe.')
+                    return render(request, 'register.html', {'form': form})
+                
+                messages.success(request, '¡Usuario registrado correctamente!')
                 return redirect('index')
             else:
-                messages.error(request, 'Error al iniciar sesión después del registro.')
-                return render(request, 'register.html', {'form': form}) # Re-renderizar con el formulario y el error
+                messages.error(request, 'Error al autenticar después del registro.')
+                return render(request, 'register.html', {'form': form})
         else:
-            return render(request, 'register.html', {'form': form}) # Re-renderizar el formulario con errores
+            return render(request, 'register.html', {'form': form})
     else:
         form = SignUpForm()
-    return render(request, 'register.html', {'form': form}) # Pasar el formulario al template en la petición GET 
+    return render(request, 'register.html', {'form': form})
 
-
+# formulario usado por el manager para agregar un nuevo conductor.
 def add_driver(request):
     if request.method == 'POST':
 
@@ -185,17 +196,26 @@ def list_trucks(request):
 
 # esta es la vista que inicia un viaje. 
 # el usuario (driver) completa el formulario y en el momento que lo confirma, se crea un nuevo track_id y un nuevo viaje.
+@login_required
 def register_trip(request):
     if request.method == 'POST':
-        form = TruckDutyForm(request.POST)
+        form = TruckDutyForm(request.POST, user=request.user)
         if form.is_valid():
-            trip = form.save()
-            # Si el formulario está ok, redirigimos travel.html.
-            return redirect('travel_actions', trip_id=trip.id)  # Este es travel.html, donde voy a poder 'descargar la carga' o 'cargar combustible'
-    else:
-        form = TruckDutyForm()
+            trip = form.save(commit=False)
+            truck = trip.truck
+            trip.initial_mileage = truck.mileage  # Guardamos el kilometraje inicial del camión al momento de iniciar el viaje.
 
-    # si el formulario no es válido, volvemos a renderizar con los errores.
+            # Asignamos el conductor al viaje
+            try:
+                trip.driver = TruckDriver.objects.get(user=request.user)
+            except TruckDriver.DoesNotExist:
+                trip.driver = None  # podría acá colocar un mensaje de error
+
+            trip.save()
+            return redirect('travel_actions', trip_id=trip.id)
+    else:
+        form = TruckDutyForm(user=request.user)
+
     return render(request, 'truckduties/register_trip.html', {'form': form})
 
 
@@ -223,8 +243,6 @@ def get_truck_mileage(request):
 # cargar combustible (fuel_register, si es requerido) o sinó proceder a la descarga (unload_register)
 # y completar el viaje.
 # las URL para estas vistas, ya van a tener asociado un <int:trip_id>, que va a ser el ID del viaje.
-
-
 def travel_actions(request, trip_id):
     trip = get_object_or_404(TruckTrip, id=trip_id)
     return render(request, 'truckduties/travel-actions.html', {'trip': trip})
@@ -272,15 +290,78 @@ def unload_register(request, trip_id):
         'trip': trip,
     })
 
+
 # vista para el resumen del viaje.
 def travel_summary(request, trip_id):
     trip = get_object_or_404(TruckTrip, id=trip_id)
 
-    # Distancia recorrida: final - inicial
-    distance = max((trip.mileage or 0) - trip.truck.mileage, 0)
+    # Guardar el valor de kilometraje del camión ANTES de modificarlo
+    initial_mileage = trip.initial_mileage  # Este sí es fijo, lo guardé al crear el viaje
+    final_mileage = trip.mileage
+    if final_mileage:
+        distance = final_mileage - initial_mileage
+    else:
+        distance = 0
 
-    return render(request, 'truckduties/travel_summary.html', {
+    context = {
         'trip': trip,
+        'initial_mileage': initial_mileage,
+        'final_mileage': final_mileage,
         'distance': distance
-    })
+    }
+
+    if final_mileage and final_mileage > trip.truck.mileage:
+        trip.truck.mileage = final_mileage
+        trip.truck.save()
+
+    return render(request, 'truckduties/travel_summary.html', context)
+
+
+# creamos la vista para exportar los viajes a CSV.
+@login_required
+def download_report(request):
+    # Obtener los viajes del manager
+    trips = TruckTrip.objects.filter(
+        truck__created_by=request.user,
+        mileage__isnull=False
+    ).select_related('truck', 'truck__driver', 'truck__driver__user').order_by('-date')
+
+    # Creamos la respuesta HTTP con cabeceras para descargar CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="reporte_viajes.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Fecha',
+        'Vehículo',
+        'Conductor',
+        'Tipo de Carga',
+        'Lugar de Carga',
+        'Fecha Descarga',
+        'Lugar de Descarga',
+        'Kilometraje Final',
+        'Distancia Recorrida',
+        'Litros Cargados',
+        'Importe',
+        'Extra'
+    ])
+
+    for trip in trips:
+        writer.writerow([
+            trip.date.strftime('%Y-%m-%d'),
+            trip.truck.plate_number,
+            trip.driver.user.get_full_name() if trip.driver else '',
+            trip.get_load_type_display(),
+            trip.get_load_location_display(),
+            trip.unload_time.strftime('%Y-%m-%d %H:%M') if trip.unload_time else '',
+            trip.get_unload_location_display() if trip.unload_location else '',
+            trip.mileage or '',
+            (trip.mileage or 0) - (trip.initial_mileage or 0),
+            trip.fuel_loaded_liters if hasattr(trip, 'fuel_loaded_liters') else '',
+            trip.fuel_loaded_amount if hasattr(trip, 'fuel_loaded_amount') else '',
+            trip.extra if hasattr(trip, 'extra') else '',
+        ])
+
+    return response
+
 

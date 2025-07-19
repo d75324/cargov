@@ -1,36 +1,54 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow p-4">
-        <h2 class="text-center mb-4">Resumen del Viaje</h2>
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow p-4">
+                <h3 class="text-center mb-4">Resumen del Viaje</h3>
 
-        <p><strong>Camión:</strong> {{ trip.truck.brand }} {{ trip.truck.moddel }} ({{ trip.truck.plate_number }})</p>
-        <p><strong>Fecha:</strong> {{ trip.date }} | <strong>Hora de Carga:</strong> {{ trip.end_load_time }}</p>
+                <p class="text-center">
+                    <strong>Camión:</strong> {{ trip.truck.brand }} {{ trip.truck.moddel }}<br>
+                    <strong>Matrícula:</strong> {{ trip.truck.plate_number }}<br>
+                    <strong>Fecha:</strong> {{ trip.date }}<br>
+                    <strong>Hora de Carga:</strong> {{ trip.end_load_time }}
+                </p>
 
-        <hr>
+                <hr>
 
-        <p><strong>Tipo de Carga:</strong> {{ trip.get_load_type_display }}</p>
-        <p><strong>Lugar de Carga:</strong> {{ trip.get_load_location_display }}</p>
-        <p><strong>Lugar de Descarga:</strong> {{ trip.get_unload_location_display }}</p>
+                <p><strong>Tipo de Carga:</strong> {{ trip.get_load_type_display }}</p>
+                <p><strong>Lugar de Carga:</strong> {{ trip.get_load_location_display }}</p>
+                <p><strong>Lugar de Descarga:</strong> {{ trip.get_unload_location_display }}</p>
 
-        <hr>
+                <hr>
 
-        <p><strong>Kilometraje Inicial:</strong> {{ trip.truck.mileage }} km</p>
-        <p><strong>Kilometraje Final:</strong> {{ trip.mileage }} km</p>
-        <p><strong>Distancia Recorrida:</strong> {{ distance }} km</p>
+                <p><strong>Kilometraje Inicial:</strong> {{ initial_mileage }} km</p>
+                <p><strong>Kilometraje Final:</strong> {{ final_mileage }} km</p>
+                <p><strong>Distancia Recorrida:</strong> {{ distance }} km</p>
 
-        {% if trip.fuel_loaded_liters %}
-        <hr>
-        <p><strong>Combustible Cargado:</strong> {{ trip.fuel_loaded_liters }} litros</p>
-        <p><strong>Importe Carga:</strong> ${{ trip.fuel_loaded_amount }}</p>
-        {% endif %}
+                {% if trip.fuel_loaded_liters %}
+                <hr>
+                <p><strong>Combustible Cargado:</strong> {{ trip.fuel_loaded_liters }} litros</p>
+                <p><strong>Importe Carga:</strong> ${{ trip.fuel_loaded_amount }}</p>
+                {% endif %}
 
-        <hr class="mt-4">
-        <div class="text-center">
-            <p class="text-success fs-5">¡El viaje ha sido registrado correctamente!</p>
-            <a href="{% url 'register_trip' %}" class="btn btn-outline-primary mt-2">Iniciar Nuevo Viaje</a>
+                <hr class="mt-4">
+
+                <div class="text-center">
+                    <p class="text-success fs-5">¡El viaje ha sido registrado correctamente!</p>
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a href="{% url 'register_trip' %}" class="btn btn-outline-primary">
+                            Iniciar Nuevo Viaje
+                        </a>
+                        <a href="{% url 'index' %}" class="btn btn-outline-danger">
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
+

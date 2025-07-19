@@ -17,5 +17,6 @@ urlpatterns = [
     path('fuel-register/<int:trip_id>/', views.fuel_register, name='fuel_register'),
     path('unload-register/<int:trip_id>/', views.unload_register, name='unload_register'),
     path('travel-summary/<int:trip_id>/', views.travel_summary, name='travel_summary'),
+    path('download_report/', views.download_report, name='download_report'),
     ]
 

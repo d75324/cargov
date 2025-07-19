@@ -1,22 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
 
+
+<!-- nav -->
 <nav class="navbar navbar-expand-lg" style="background-color: #d8e7ec;">
     <div class="container-fluid">
-      
       <a class="navbar-brand" href="#">
         {% if user.is_authenticated %}
         <strong>{{ user.first_name|default:user.username|capfirst }}</strong> 
         {% else %}
             CargaV
         {% endif %}
-    </a>
-      
-
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
-      </button>
+        </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">  <!-- ms-auto para alinear a la derecha -->
           <li class="nav-item">
@@ -27,6 +25,8 @@
     </div>
   </nav><br><br>
 
+
+<!-- encabezado tabla conductores -->
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
   <h3>Conductores ({{ total_trucks }})</h3>
   <div>
@@ -34,6 +34,8 @@
     <button class="btn btn-sm btn-outline-secondary">Desafectar Conductor</button>
   </div>
 </div><hr>
+<!-- FIN encabezado tabla conductores -->
+
 
 <!-- tabla conductores -->
 <div class="container mt-4">
@@ -67,13 +69,14 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="8" class="text-center">No hay conductores registrados.</td>
+                <td colspan="8" class="text-center text-muted py-4">No hay conductores registrados. <br> <a href="{% url 'add_driver' %}">Agregar uno</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div><br><br>
-<!-- fin tabla conductores-->
+<!-- FIN tabla conductores-->
 
 
 <!-- encabezado cuadro vehículos -->
@@ -84,7 +87,7 @@
     <a href="{% url 'add_truck' %}" class="btn btn-sm btn-outline-secondary">Agregar Vehículo</a>
   </div>
 </div><hr>
-<!-- fin de encabezado cuadro vehículos -->
+<!-- FIN de encabezado cuadro vehículos -->
 
 
 <!-- tabla vehiculos -->
@@ -138,98 +141,70 @@
             {% empty %}
             <tr>
                 <td colspan="7" class="text-center text-muted py-4">
-                    No hay vehículos registrados. 
+                    No hay vehículos registrados. <br>
                     <a href="{% url 'add_truck' %}">Agregar uno</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</div>
-<!-- fin tabla vehículos -->
+</div><br><br>
+<!-- FIN tabla vehículos -->
 
-<br>
-<br>
 
 <!-- encabezado cuadro viajes -->
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 30px;">
   <h3>Viajes</h3>
   <div>
     <button class="btn btn-sm btn-outline-secondary">Buscar</button>
-    <button class="btn btn-sm btn-outline-secondary">Descargar Reporte</button>
+    <a href="{% url 'download_report' %}" class="btn btn-sm btn-outline-secondary">Descargar Reporte</a>
   </div>
 </div><hr>
+<!-- FIN encabezado cuadro viajes -->
+
 
 <!-- tabla viajes -->
+<div class="container mt-4">
+  <table class="table table-striped">
+    <thead>
+      <tr class="text-center">
+        <th>Fecha Carga</th>
+        <th>Vehículo</th>
+        <th>Tipo Carga</th>
+        <th>Lugar Carga</th>
+        <th>Fecha Descarga</th>
+        <th>Lugar Descarga</th>
+        <th>Kms</th>
+        <th style="background-color: #e9fbe8;">Litros</th>
+        <th style="background-color: #e9fbe8;">Importe</th>
+        <th>Km Totales</th>
+        <th>EXTRA</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trip in trips %}
+      <tr class="align-middle text-center">
+        <td>{{ trip.date|date:"M j" }} <br> {{ trip.end_load_time|date:"P" }}</td>
+        <td>{{ trip.truck.plate_number }}</td>
+        <td>{{ trip.get_load_type_display }}</td>
+        <td>{{ trip.get_load_location_display }}</td>
+        <td>{{ trip.unload_time|date:"M j" }} <br> {{ trip.unload_time|date:"P" }}</td>
+        <td>{{ trip.get_unload_location_display }}</td>
+        <td>{{ trip.distance }} km</td>
+        <td style="background-color: #e9fbe8;">{{ trip.fuel_loaded_liters|default:"—" }}</td>
+        <td style="background-color: #e9fbe8;">${{ trip.fuel_loaded_amount|default:"—" }}</td>
+        <td>{{ trip.mileage }} km</td>
+        <td>—</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="11" class="text-center text-muted py-4">No hay viajes registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div> <br><br><br>
+<!-- FIN tabla viajes -->
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Fecha</th>
-      <th scope="col">Hora Carga</th>
-      <th scope="col">Vehículo</th>
-      <th scope="col">Tipo Carga</th>
-      <th scope="col">Lugar Carga</th>
-      <th scope="col">Hora Descarga</th>
-      <th scope="col">Lugar Descarga</th>
-      <th scope="col">Kilometros</th>
-      <th scope="col">Litros</th>
-      <th scope="col">Importe</th>
-      <th scope="col">Kilometraje</th>
-      <th scope="col">Litros/Viaje</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-      <td>John</td>
-      <td>Doe</td>
-      <td>@social</td>
-    </tr>
-  </tbody>
-</table>
-<br><br><br>
-
-<!-- fin tabla viajes -->
 
 {% endblock %}
