@@ -333,7 +333,7 @@ def download_report(request):
     writer = csv.writer(response)
     writer.writerow([
         'Fecha',
-        'Vehículo',
+        'Vehiculo',
         'Conductor',
         'Tipo de Carga',
         'Lugar de Carga',
